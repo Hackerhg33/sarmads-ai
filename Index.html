@@ -1,20 +1,21 @@
-<!-- ========== PART 1: HEAD & STYLE (Copy this first) ========== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sarmad's AI - Instant Voice</title>
+<title>Sarmad's AI - Voice Assistant</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* ================= GLOBAL STYLES ================= */
 body{
     margin:0;
     background:black;
     color:#00f7ff;
     font-family:'Orbitron',sans-serif;
-    overflow-y:auto;
-    overflow-x:hidden;
+    overflow:hidden;
 }
+
+/* ================= MAIN PANEL ================= */
 .panel{
     position:absolute;
     top:50%;
@@ -25,10 +26,14 @@ body{
     max-width:500px;
     z-index:2;
 }
+
 h1{
     letter-spacing:4px;
     text-shadow:0 0 25px #00f7ff;
+    font-size:2em;
 }
+
+/* ================= ANIMATED ORB ================= */
 .orb{
     width:180px;
     height:180px;
@@ -38,22 +43,28 @@ h1{
     box-shadow:0 0 40px #00f7ff;
     transition:0.5s;
 }
+
 .orb.loading{
     animation:pulse 1.2s infinite;
 }
+
 .orb.thinking{
     animation:spin 1s linear infinite;
     border:2px dashed #00f7ff;
     box-shadow:0 0 80px #00f7ff;
 }
+
 @keyframes pulse{
     0%{transform:scale(1);box-shadow:0 0 20px #00f7ff;}
     50%{transform:scale(1.1);box-shadow:0 0 100px #00f7ff;}
     100%{transform:scale(1);box-shadow:0 0 20px #00f7ff;}
 }
+
 @keyframes spin{
     100%{transform:rotate(360deg);}
 }
+
+/* ================= BUTTONS ================= */
 button{
     padding:12px 30px;
     background:transparent;
@@ -65,11 +76,14 @@ button{
     letter-spacing:1px;
     transition:0.2s;
 }
+
 button:hover{
     background:#00f7ff;
     color:black;
     box-shadow:0 0 20px #00f7ff;
 }
+
+/* ================= STATUS DISPLAY ================= */
 #status{
     margin-top:20px;
     min-height:70px;
@@ -82,6 +96,8 @@ button:hover{
     border:1px solid #00f7ff33;
     line-height:1.5;
 }
+
+/* ================= API SETUP PANEL ================= */
 .api-setup-panel{
     position:fixed;
     top:20px;
@@ -99,13 +115,14 @@ button:hover{
     z-index:100;
     font-size:14px;
     text-align:left;
-    pointer-events:auto;
 }
+
 .api-setup-panel h2{
     color:#00f7ff;
     margin:0 0 15px 0;
     text-align:center;
 }
+
 .api-setup-panel input{
     width:100%;
     padding:12px;
@@ -117,10 +134,12 @@ button:hover{
     margin:10px 0;
     box-sizing:border-box;
 }
+
 .api-setup-panel button{
     margin:5px;
     padding:10px 20px;
 }
+
 .api-setup-panel .close{
     position:absolute;
     top:10px;
@@ -128,6 +147,8 @@ button:hover{
     cursor:pointer;
     font-size:20px;
 }
+
+/* ================= INSTRUCTION BOX ================= */
 .step-box{
     background:rgba(0,50,50,0.5);
     border-left:3px solid #00f7ff;
@@ -135,17 +156,66 @@ button:hover{
     margin:15px 0;
     border-radius:0 8px 8px 0;
 }
+
 .step-box ol{
     margin:5px 0 5px 20px;
 }
+
 .step-box li{
     margin:8px 0;
 }
+
 .warning{
     color:#ffaa00;
     font-size:12px;
     margin:10px 0;
 }
+</style>
+</head>
+<body><!-- ================= API KEY PANEL ================= -->
+<div id="apiPanel" class="api-setup-panel">
+    <span class="close" onclick="hideApiPanel()">✖</span>
+    <h2>🔐 ENTER YOUR API KEY</h2>
+    
+    <div class="step-box">
+        <strong>📌 GET FREE KEY (2 min):</strong>
+        <ol>
+            <li>Go to <strong style="color:#00f7ff">makersuite.google.com/app/apikey</strong></li>
+            <li>Click "Create API Key"</li>
+            <li>Copy and paste below</li>
+        </ol>
+    </div>
+
+    <input type="text" id="apiKeyInput" placeholder="Paste your Gemini API Key here">
+    
+    <div style="text-align:center">
+        <button onclick="saveApiKey()">💾 SAVE KEY</button>
+        <button onclick="testApiKey()">🔍 TEST KEY</button>
+    </div>
+
+    <div class="warning">
+        ⚠️ Key saved only in your browser • Never uploaded
+    </div>
+</div>
+
+<!-- ================= MAIN INTERFACE ================= -->
+<div class="panel">
+    <h1>⚡ SARMAD'S AI ⚡</h1>
+    <div id="orb" class="orb"></div>
+    <p id="status">🔴 SYSTEM OFFLINE</p>
+    <button id="btn">INITIALIZE SYSTEM</button>
+</div>
+
+<!-- ================= FOOTER BAR ================= -->
+<div class="footer-bar">
+    <span>🚀 FREE ON GITHUB PAGES</span>
+    <a onclick="showApiPanel()">🔑 SET API KEY</a>
+    <a onclick="showInstructions()">📖 HOW TO SHARE</a>
+    <span id="keyStatus" style="color:#ffaa00">⚡ NO KEY</span>
+</div>
+
+<!-- ================= FOOTER STYLES ================= -->
+<style>
 .footer-bar{
     position:fixed;
     bottom:0;
@@ -166,405 +236,15 @@ button:hover{
     padding:5px 12px;
     border:1px solid #00f7ff33;
     border-radius:20px;
+    cursor:pointer;
 }
 .footer-bar a:hover{
     background:#00f7ff22;
 }
-.model-badge {
-    display:inline-block;
-    background:#00f7ff22;
-    border:1px solid #00f7ff;
-    border-radius:20px;
-    padding:4px 12px;
-    margin-top:10px;
-    font-size:12px;
-}
-.instant-badge {
-    color:#00ffaa;
-    font-size:11px;
-    margin-top:5px;
-}
 </style>
-</head>
-<body><!-- ========== PART 2: BODY & SCRIPT (Copy this second) ========== -->
-<!-- API Key Setup Panel (shown first time) -->
-<div id="apiPanel" class="api-setup-panel">
-    <span class="close" onclick="document.getElementById('apiPanel').style.display='none'">✖</span>
-    <h2>🔐 GEMINI 2.5 FLASH SETUP</h2>
-    
-    <div class="step-box">
-        <strong>📌 INSTANT VOICE MODE (NO WAKE WORD):</strong>
-        <ol>
-            <li>Get API key from <strong style="color:#00f7ff">makersuite.google.com/app/apikey</strong></li>
-            <li>Enter key below (stored in your browser)</li>
-            <li>Click LISTEN and speak immediately</li>
-            <li><span style="color:#00ffaa">✨ No wake word needed!</span></li>
-        </ol>
-    </div>
 
-    <div style="text-align:center">
-        <input type="text" id="apiKeyInput" placeholder="Enter your Gemini API Key" value="AIzaSyBbE70Znc3p7B-uY5EV_TDdQMCxcZJxP70">
-        
-        <div class="model-badge">
-            🤖 MODEL: gemini-2.5-flash
-        </div>
-        <div class="instant-badge">
-            🎤 Instant voice • No wake word
-        </div>
-        
-        <br>
-        <button onclick="saveApiKey()">💾 SAVE & INITIALIZE</button>
-        <button onclick="testApiKey()">🔍 TEST KEY</button>
-    </div>
+<!-- ================= JAVASCRIPT ================= -->
+<script src="app.js"></script>
 
-    <div class="warning">
-        ⚠️ Your API key stays in your browser - safe for GitHub sharing!
-    </div>
-    
-    <div style="font-size:12px; text-align:center; margin-top:15px; color:#00f7ff99">
-        ✨ Click LISTEN • Speak • Get response instantly
-    </div>
-</div>
-
-<div class="panel">
-<h1>⚡ SARMAD'S AI ⚡</h1>
-<div id="orb" class="orb"></div>
-<p id="status">🔴 SYSTEM OFFLINE</p>
-<button id="btn">INITIALIZE SYSTEM</button>
-<div style="margin-top:10px; font-size:10px; color:#00f7ff66">instant voice • no wake word</div>
-</div>
-
-<div class="footer-bar">
-    <span>🚀 INSTANT VOICE MODE</span>
-    <a href="#" onclick="document.getElementById('apiPanel').style.display='block'">🔑 SET API KEY</a>
-    <a href="#" onclick="showInstructions()">📖 SHARE</a>
-    <span id="keyStatus" style="color:#00ffaa">⚡</span>
-</div>
-
-<script>
-/* ================= CONFIG ================= */
-let API_KEY = localStorage.getItem("gemini_api_key") || "";
-const MODEL = "gemini-2.5-flash";
-
-// If no key, show panel
-if(!API_KEY) {
-    setTimeout(() => {
-        document.getElementById('apiPanel').style.display = 'block';
-    }, 500);
-} else {
-    document.getElementById('keyStatus').innerHTML = '✓ READY';
-}
-
-/* ================= MEMORY ================= */
-let memory = JSON.parse(localStorage.getItem("sarmadAI_Memory")) || {
-    facts: {},
-    customReplies: {},
-    history: []
-};
-
-function saveMemory(){
-    localStorage.setItem("sarmadAI_Memory", JSON.stringify(memory));
-}
-
-/* ================= ELEMENTS ================= */
-const orb = document.getElementById("orb");
-const statusText = document.getElementById("status");
-const btn = document.getElementById("btn");
-let recognition;
-let isListening = false;
-
-/* ================= API KEY FUNCTIONS ================= */
-function saveApiKey() {
-    let key = document.getElementById('apiKeyInput').value.trim();
-    
-    if(key) {
-        API_KEY = key;
-        localStorage.setItem("gemini_api_key", key);
-        document.getElementById('apiPanel').style.display = 'none';
-        document.getElementById('keyStatus').innerHTML = '✓ READY';
-        statusText.innerText = "API Key saved! Initialize system.";
-        speak("API key saved. Ready for instant voice.");
-    } else {
-        alert("Please enter a valid API key");
-    }
-}
-
-function testApiKey() {
-    let key = document.getElementById('apiKeyInput').value.trim();
-    if(!key) {
-        alert("Enter a key first");
-        return;
-    }
-    
-    statusText.innerText = "Testing connection...";
-    fetch(`https://generativelanguage.googleapis.com/v1/models?key=${key}`, {
-        method: "GET"
-    })
-    .then(r => r.json())
-    .then(data => {
-        if(data.error) {
-            alert("❌ Invalid key: " + data.error.message);
-            statusText.innerText = "API key invalid";
-        } else {
-            alert("✅ API key works! Ready for instant voice.");
-            statusText.innerText = "API key valid!";
-        }
-    })
-    .catch(e => {
-        alert("Error testing key: " + e.message);
-    });
-}
-
-function showInstructions() {
-    let shareText = "INSTANT VOICE MODE (no wake word):\n\n1. Click LISTEN button\n2. Speak immediately\n3. Get response\n\nEach user needs their own API key from makersuite.google.com";
-    alert(shareText);
-}
-
-/* ================= VOICE OUTPUT ================= */
-function speak(text){
-    window.speechSynthesis.cancel();
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.rate = 1;
-    speech.pitch = 0.9;
-    speech.volume = 1;
-    window.speechSynthesis.speak(speech);
-}
-
-/* ================= BOOT ================= */
-btn.onclick = () => {
-    if(!API_KEY) {
-        document.getElementById('apiPanel').style.display = 'block';
-        statusText.innerText = "Please set API key first";
-        return;
-    }
-    
-    if(btn.innerText === "INITIALIZE SYSTEM"){
-        boot();
-    } else {
-        // Toggle listening - NO WAKE WORD, just listen immediately
-        if(!isListening) {
-            startInstantListening();
-        } else {
-            stopListening();
-        }
-    }
-};
-
-async function boot(){
-    btn.style.display="none";
-    orb.classList.add("loading");
-    statusText.innerText="⚡ INITIALIZING...";
-    await sleep(1300);
-    orb.classList.remove("loading");
-    statusText.innerText="🟢 AI ONLINE · CLICK LISTEN TO SPEAK";
-    speak("Sarmad's AI is online. Click listen and speak. No wake word needed.");
-    btn.innerText="🎤 LISTEN";
-    btn.style.display="inline-block";
-}
-
-/* ================= INSTANT LISTENING (NO WAKE WORD) ================= */
-function startInstantListening(){
-    if(!API_KEY) {
-        document.getElementById('apiPanel').style.display = 'block';
-        statusText.innerText = "Set API key first";
-        return;
-    }
-    
-    if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
-        statusText.innerText="❌ Voice not supported. Use Chrome/Edge.";
-        return;
-    }
-    
-    // Stop any existing recognition
-    if(recognition) {
-        recognition.stop();
-    }
-    
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.continuous = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.start();
-    isListening = true;
-    orb.classList.add("loading");
-    btn.innerText = "⏹️ STOP";
-    statusText.innerText="🎤 Listening... (speak now)";
-
-    recognition.onresult = (event)=>{
-        let text = event.results[0][0].transcript;
-        orb.classList.remove("loading");
-        orb.classList.add("thinking");
-        statusText.innerText=`✅ You said: "${text}"`;
-        
-        // Send to Gemini immediately - NO WAKE WORD CHECK
-        askGemini(text);
-        
-        memory.history.push("[user] "+text);
-        if(memory.history.length>50) memory.history.shift();
-        saveMemory();
-        
-        isListening = false;
-        btn.innerText = "🎤 LISTEN";
-    };
-
-    recognition.onerror = (event)=>{
-        orb.classList.remove("loading");
-        statusText.innerText="🎙️ Error: " + (event.error || 'unknown');
-        if(event.error === 'not-allowed') speak("Please allow microphone access.");
-        isListening = false;
-        btn.innerText = "🎤 LISTEN";
-    };
-
-    recognition.onend = ()=>{
-        orb.classList.remove("loading");
-        if(isListening) {
-            // If it ended but we're still in listening mode, reset
-            isListening = false;
-            btn.innerText = "🎤 LISTEN";
-            statusText.innerText = "Listening stopped. Click LISTEN to speak.";
-        }
-    };
-}
-
-function stopListening() {
-    if(recognition) {
-        recognition.stop();
-    }
-    isListening = false;
-    orb.classList.remove("loading");
-    btn.innerText = "🎤 LISTEN";
-    statusText.innerText = "Listening stopped.";
-}
-
-/* ================= GEMINI API ================= */
-async function askGemini(userText){
-    if(!userText || userText.length===0){
-        reply("I didn't catch that. Try again.");
-        return;
-    }
-
-    // memory commands
-    if(userText.toLowerCase().startsWith("remember that") || userText.includes("store reply")){
-        handleMemoryCommand(userText);
-        return;
-    }
-    if(userText.toLowerCase().includes("show memory") || userText.includes("list triggers")){
-        showMemory();
-        return;
-    }
-
-    // check custom replies
-    for(let trigger in memory.customReplies){
-        if(userText.toLowerCase().includes(trigger.toLowerCase())){
-            reply(memory.customReplies[trigger]);
-            return;
-        }
-    }
-
-    try {
-        await callGeminiWithModel(MODEL, userText);
-    } catch (error) {
-        console.log("Falling back to gemini-1.5-flash");
-        try {
-            await callGeminiWithModel("gemini-1.5-flash", userText);
-        } catch (fallbackError) {
-            reply("Error: " + (error.message || "Unknown").substring(0, 80));
-        }
-    }
-}
-
-async function callGeminiWithModel(modelName, userText) {
-    const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${API_KEY}`,
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: userText
-                    }]
-                }]
-            })
-        }
-    );
-    
-    const data = await response.json();
-
-    if (data.error) {
-        throw new Error(data.error.message);
-    }
-
-    let replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (replyText) {
-        reply(replyText);
-    } else {
-        reply("(no response)");
-    }
-}
-
-/* ========== MEMORY COMMANDS ========== */
-function handleMemoryCommand(cmd){
-    let lower = cmd.toLowerCase();
-    if(lower.includes("remember that")){
-        let parts = cmd.split("remember that")[1].split("is");
-        if(parts.length>=2){
-            let trigger = parts[0].trim();
-            let response = parts.slice(1).join("is").trim();
-            if(trigger && response){
-                memory.customReplies[trigger.toLowerCase()] = response;
-                saveMemory();
-                reply(`Stored: "${trigger}" → "${response}"`);
-            } else reply("Use: remember that [trigger] is [reply]");
-        } else reply("Example: remember that sky is blue");
-    }
-    else if(lower.includes("store reply")){
-        let match = cmd.match(/store reply ["'](.+?)["']\s*=>\s*["'](.+?)["']/);
-        if(match){
-            memory.customReplies[match[1].toLowerCase()] = match[2];
-            saveMemory();
-            reply(`Trigger "${match[1]}" stored.`);
-        } else reply('Format: store reply "trigger" => "response"');
-    }
-    else reply("Memory command not recognized");
-}
-
-function showMemory(){
-    let keys = Object.keys(memory.customReplies);
-    reply(keys.length ? "Triggers: " + keys.join(", ") : "No custom memory.");
-}
-
-/* ================= RESPONSE ================= */
-function reply(text){
-    orb.classList.remove("thinking");
-    orb.classList.remove("loading");
-    statusText.innerText = text;
-    speak(text);
-}
-
-function sleep(ms){
-    return new Promise(resolve=>setTimeout(resolve,ms));
-}
-
-orb.addEventListener('click', ()=>{
-    if(btn.innerText !== "INITIALIZE SYSTEM" && btn.innerText !== "⏹️ STOP") {
-        startInstantListening();
-    } else if(btn.innerText === "⏹️ STOP") {
-        stopListening();
-    }
-});
-
-// Clean up on page unload
-window.addEventListener('beforeunload', function() {
-    if(recognition) {
-        recognition.stop();
-    }
-});
-
-</script>
 </body>
-  </html>
+</html>
